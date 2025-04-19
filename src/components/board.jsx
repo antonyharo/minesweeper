@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Tile from "./tile";
+import Tile from "@components/tile";
 
 export default function Board({ matrix }) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
@@ -37,7 +37,12 @@ export default function Board({ matrix }) {
             const [row, col] = queue.shift();
             const key = `${row},${col}`;
 
-            if (!isInBounds(row, col) || visited.has(key)) continue;
+            if (
+                !isInBounds(row, col) ||
+                newHidden[row][col] === "flag" ||
+                visited.has(key)
+            )
+                continue;
             visited.add(key);
 
             if (matrix[row][col] === "x") continue; // Nunca revela bomba aqui
@@ -65,7 +70,13 @@ export default function Board({ matrix }) {
     };
 
     const handleClick = (row, col) => {
-        if (!isInBounds(row, col) || !hiddenMatrix[row][col] || defeat || win)
+        if (
+            !isInBounds(row, col) ||
+            !hiddenMatrix[row][col] ||
+            hiddenMatrix[row][col] === "flag" ||
+            defeat ||
+            win
+        )
             return;
 
         const value = matrix[row][col];
@@ -83,11 +94,29 @@ export default function Board({ matrix }) {
 
         if (value === 0) {
             revealEmptyArea(row, col);
-        } else {
-            const newHidden = hiddenMatrix.map((r) => [...r]);
-            newHidden[row][col] = false;
-            setHiddenMatrix(newHidden);
+            return;
         }
+
+        const newHidden = hiddenMatrix.map((r) => [...r]);
+        newHidden[row][col] = false;
+        setHiddenMatrix(newHidden);
+    };
+
+    const handleRightClick = (event, row, col) => {
+        event.preventDefault();
+        if (!isInBounds(row, col) || !hiddenMatrix[row][col] || defeat || win)
+            return;
+
+        const newHidden = hiddenMatrix.map((r) => [...r]);
+
+        if (newHidden[row][col] === "flag") {
+            newHidden[row][col] = true;
+            setHiddenMatrix(newHidden);
+            return;
+        }
+
+        newHidden[row][col] = "flag";
+        setHiddenMatrix(newHidden);
     };
 
     if (!matrix || matrix.length === 0 || hiddenMatrix.length === 0) {
@@ -101,13 +130,17 @@ export default function Board({ matrix }) {
     return (
         <div className="grid gap-2">
             {matrix.map((row, i) => (
-                <div key={i} className={`grid grid-cols-${row.length} gap-2`}>
+                <div key={i} className="grid grid-cols-9 gap-2">
                     {row.map((cell, j) => (
                         <Tile
                             key={j}
                             value={cell}
                             hidden={hiddenMatrix[i][j]}
+                            flag={hiddenMatrix[i][j] === "flag"}
                             onClick={() => handleClick(i, j)}
+                            onRightClick={(event) => {
+                                handleRightClick(event, i, j);
+                            }}
                         />
                     ))}
                 </div>

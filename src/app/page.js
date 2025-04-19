@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createMatrix } from "./lib/utils";
-import Board from "./components/board";
+import { createMatrix } from "@/lib/utils";
+import Board from "@/components/board";
 
 export default function Page() {
     const [matrix, setMatrix] = useState([]);
