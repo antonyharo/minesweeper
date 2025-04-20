@@ -9,7 +9,7 @@ const directions = [
     [1, 1],
 ];
 
-export const createMatrix = (rows, cols, bombs) => {
+export const createMatrix = async (rows, cols, bombs) => {
     const matrix = createEmptyMatrix(rows, cols);
     addBombs(matrix, bombs);
     return matrix;

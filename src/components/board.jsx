@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import Tile from "@components/tile";
 
-export default function Board({ matrix }) {
+export default function Board({
+    matrix,
+    loading,
+    win,
+    setWin,
+    defeat,
+    setDefeat,
+}) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
-    const [win, setWin] = useState(false);
-    const [defeat, setDefeat] = useState(false);
 
     const directions = [
         [-1, -1],
@@ -119,7 +124,12 @@ export default function Board({ matrix }) {
         setHiddenMatrix(newHidden);
     };
 
-    if (!matrix || matrix.length === 0 || hiddenMatrix.length === 0) {
+    if (
+        !matrix ||
+        matrix.length === 0 ||
+        hiddenMatrix.length === 0 ||
+        loading
+    ) {
         return (
             <div className="font-medium text-zinc-500">
                 Carregando tabuleiro...
