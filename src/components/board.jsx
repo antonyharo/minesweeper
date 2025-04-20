@@ -13,6 +13,20 @@ export default function Board({
 }) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
 
+    useEffect(() => {
+        if (!matrix || hiddenMatrix.length === 0 || loading) return;
+
+        const totalCells = matrix.length * matrix[0].length;
+        const bombCount = matrix.flat().filter((cell) => cell === "x").length;
+        const revealedCount = hiddenMatrix
+            .flat()
+            .filter((cell) => cell === false).length;
+
+        if (revealedCount === totalCells - bombCount) {
+            handleWin();
+        }
+    }, [hiddenMatrix]);
+
     const directions = [
         [-1, -1],
         [-1, 0],
@@ -48,9 +62,10 @@ export default function Board({
                 visited.has(key)
             )
                 continue;
+
             visited.add(key);
 
-            if (matrix[row][col] === "x") continue; // Nunca revela bomba aqui
+            if (matrix[row][col] === "x") continue;
 
             newHidden[row][col] = false;
 
@@ -74,6 +89,22 @@ export default function Board({
         setHiddenMatrix(newHidden);
     };
 
+    const handleWin = () => {
+        const newHidden = matrix.map((row, i) =>
+            row.map((cell, j) => (cell = false))
+        );
+        setHiddenMatrix(newHidden);
+        setWin(true);
+    };
+
+    const handleDefeat = () => {
+        const newHidden = matrix.map((row, i) =>
+            row.map((cell, j) => (cell = false))
+        );
+        setHiddenMatrix(newHidden);
+        setDefeat(true);
+    };
+
     const handleClick = (row, col) => {
         if (
             !isInBounds(row, col) ||
@@ -87,13 +118,7 @@ export default function Board({
         const value = matrix[row][col];
 
         if (value === "x") {
-            const newHidden = matrix.map((row, i) =>
-                row.map((cell, j) =>
-                    cell === "x" ? false : hiddenMatrix[i][j]
-                )
-            );
-            setHiddenMatrix(newHidden);
-            setDefeat(true);
+            handleDefeat();
             return;
         }
 
@@ -146,6 +171,7 @@ export default function Board({
                             key={j}
                             value={cell}
                             hidden={hiddenMatrix[i][j]}
+                            win={win}
                             flag={hiddenMatrix[i][j] === "flag"}
                             onClick={() => handleClick(i, j)}
                             onRightClick={(event) => {

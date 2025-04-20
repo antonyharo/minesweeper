@@ -13,7 +13,9 @@ export default function Page() {
         setLoading(true);
         const newMatrix = await createMatrix(9, 9, 10);
         setMatrix(newMatrix);
-        setLoading(false);
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
     };
 
     const resetGame = async () => {
