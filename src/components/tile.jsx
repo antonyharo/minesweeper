@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "motion/react";
+
 export default function Tile({
     value,
     hidden,
@@ -9,10 +11,10 @@ export default function Tile({
     onRightClick,
 }) {
     return (
-        <button
+        <motion.div
             onClick={onClick}
             onContextMenu={onRightClick}
-            className={`h-8 w-8 grid content-center rounded-sm border-none ${
+            className={`h-8 w-8 text-sm flex items-center justify-center rounded-sm border-none ${
                 hidden
                     ? "bg-zinc-800"
                     : value === "x"
@@ -25,6 +27,6 @@ export default function Tile({
             }`}
         >
             {flag ? "🚩" : hidden ? "" : value === "x" ? "💣" : value}
-        </button>
+        </motion.div>
     );
 }
