@@ -23,13 +23,12 @@ export default function Board({
         [1, 1],
     ];
 
-    const isInBounds = (row, col) =>
-        row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length;
-
     useEffect(() => {
         if (matrix && matrix.length > 0) {
             setHiddenMatrix(matrix.map((row) => row.map(() => true)));
         }
+
+        console.table(matrix);
     }, [matrix]);
 
     useEffect(() => {
@@ -47,6 +46,9 @@ export default function Board({
             setWin(true);
         }
     }, [hiddenMatrix, loading, matrix, setWin]);
+
+    const isInBounds = (row, col) =>
+        row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length;
 
     const handleDefeat = () => {
         const revealed = matrix.map((row) => row.map(() => false));
@@ -101,7 +103,7 @@ export default function Board({
     const clickAdjacentCells = (row, col) => {
         let newHidden = hiddenMatrix.map((row) => [...row]);
 
-        directions.forEach(([dr, dc]) => {
+        for (const [dr, dc] of directions) {
             const newRow = row + dr;
             const newCol = col + dc;
 
@@ -109,7 +111,7 @@ export default function Board({
                 !isInBounds(newRow, newCol) ||
                 newHidden[newRow][newCol] !== true
             )
-                return;
+                continue;
 
             if (matrix[newRow][newCol] === "x") {
                 handleDefeat();
@@ -121,7 +123,7 @@ export default function Board({
             } else {
                 newHidden[newRow][newCol] = false;
             }
-        });
+        }
 
         setHiddenMatrix(newHidden);
     };
