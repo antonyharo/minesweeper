@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createMatrix } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import Board from "@/components/board";
 
 export default function Page() {
@@ -45,13 +46,13 @@ export default function Page() {
                     setDefeat={setDefeat}
                 />
             )}
-            <button
-                className="py-1 px-2 rounded-sm border-2 border-red-400 text-red-400 font-medium cursor-pointer disabled:opacity-50"
+            <Button
+                // className="py-1 px-2 rounded-sm border-2 border-red-400 text-red-400 font-medium cursor-pointer disabled:opacity-50"
                 onClick={resetGame}
                 disabled={loading}
             >
                 New Game
-            </button>
+            </Button>
         </main>
     );
 }

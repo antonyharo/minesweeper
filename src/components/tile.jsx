@@ -1,32 +1,38 @@
 "use client";
 
-import { motion } from "motion/react";
+import { memo } from "react";
 
-export default function Tile({
-    value,
-    hidden,
-    win,
-    flag,
-    onClick,
-    onRightClick,
-}) {
+function Tile({ value, hidden, win, flag, onClick, onRightClick }) {
+    const baseClasses =
+        "h-8 w-8 text-sm flex items-center justify-center rounded-sm border-none transition duration-200";
+    const visibleClass = hidden
+        ? "bg-zinc-300 hover:bg-zinc-400 cursor-pointer"
+        : value === "x"
+        ? win
+            ? "bg-green-400"
+            : "bg-red-400"
+        : "bg-transparent";
+
+    const displayContent = flag
+        ? "🚩"
+        : hidden
+        ? ""
+        : value === "x"
+        ? "💣"
+        : value === 0
+        ? ""
+        : value;
+
     return (
-        <motion.div
+        <button
+            size={"icon"}
             onClick={onClick}
             onContextMenu={onRightClick}
-            className={`h-8 w-8 text-sm flex items-center justify-center rounded-sm border-none ${
-                hidden
-                    ? "bg-zinc-800"
-                    : value === "x"
-                    ? win
-                        ? "bg-green-400"
-                        : "bg-red-400"
-                    : "bg-transparent"
-            } transition duration-200 ${
-                hidden ? "hover:bg-zinc-700 cursor-pointer" : ""
-            }`}
+            className={`${baseClasses} ${visibleClass}`}
         >
-            {flag ? "🚩" : hidden ? "" : value === "x" ? "💣" : value}
-        </motion.div>
+            {displayContent}
+        </button>
     );
 }
+
+export default memo(Tile);

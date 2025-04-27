@@ -1,7 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Tile from "@components/tile";
+import Tile from "@/components/tile";
+
+// Direções fixas (fora do componente para não recriar a cada render)
+const DIRECTIONS = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+];
+
+// Função para copiar matrizes profundamente
+const deepCopyMatrix = (matrix) => matrix.map((row) => [...row]);
+
+// Função para comparar duas matrizes
+const matricesEqual = (a, b) =>
+    a.length === b.length &&
+    a.every((row, i) => row.every((cell, j) => cell === b[i][j]));
 
 export default function Board({
     matrix,
@@ -12,23 +32,15 @@ export default function Board({
     setDefeat,
 }) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
-    const directions = [
-        [-1, -1],
-        [-1, 0],
-        [-1, 1],
-        [0, -1],
-        [0, 1],
-        [1, -1],
-        [1, 0],
-        [1, 1],
-    ];
 
     useEffect(() => {
         if (matrix && matrix.length > 0) {
             setHiddenMatrix(matrix.map((row) => row.map(() => true)));
-        }
 
-        console.table(matrix);
+            if (process.env.NODE_ENV === "development") {
+                console.table(matrix);
+            }
+        }
     }, [matrix]);
 
     useEffect(() => {
@@ -57,7 +69,7 @@ export default function Board({
     };
 
     const countAdjacentFlags = (row, col) =>
-        directions.reduce((count, [dr, dc]) => {
+        DIRECTIONS.reduce((count, [dr, dc]) => {
             const newRow = row + dr;
             const newCol = col + dc;
             return isInBounds(newRow, newCol) &&
@@ -69,7 +81,7 @@ export default function Board({
     const revealEmptyArea = (startRow, startCol, baseHidden) => {
         const queue = [[startRow, startCol]];
         const visited = new Set();
-        const newHidden = baseHidden.map((row) => [...row]);
+        const newHidden = deepCopyMatrix(baseHidden);
 
         while (queue.length > 0) {
             const [row, col] = queue.shift();
@@ -86,7 +98,7 @@ export default function Board({
             newHidden[row][col] = false;
 
             if (matrix[row][col] === 0) {
-                directions.forEach(([dr, dc]) => {
+                DIRECTIONS.forEach(([dr, dc]) => {
                     const newRow = row + dr;
                     const newCol = col + dc;
                     const newKey = `${newRow},${newCol}`;
@@ -101,9 +113,9 @@ export default function Board({
     };
 
     const clickAdjacentCells = (row, col) => {
-        let newHidden = hiddenMatrix.map((row) => [...row]);
+        let newHidden = deepCopyMatrix(hiddenMatrix);
 
-        for (const [dr, dc] of directions) {
+        for (const [dr, dc] of DIRECTIONS) {
             const newRow = row + dr;
             const newCol = col + dc;
 
@@ -125,7 +137,9 @@ export default function Board({
             }
         }
 
-        setHiddenMatrix(newHidden);
+        if (!matricesEqual(hiddenMatrix, newHidden)) {
+            setHiddenMatrix(newHidden);
+        }
     };
 
     const handleNumberClick = (row, col) => {
@@ -154,7 +168,7 @@ export default function Board({
             return;
         }
 
-        let newHidden = hiddenMatrix.map((row) => [...row]);
+        let newHidden = deepCopyMatrix(hiddenMatrix);
 
         if (matrix[row][col] === 0) {
             newHidden = revealEmptyArea(row, col, newHidden);
@@ -162,7 +176,9 @@ export default function Board({
             newHidden[row][col] = false;
         }
 
-        setHiddenMatrix(newHidden);
+        if (!matricesEqual(hiddenMatrix, newHidden)) {
+            setHiddenMatrix(newHidden);
+        }
     };
 
     const handleRightClick = (e, row, col) => {
@@ -175,9 +191,12 @@ export default function Board({
         )
             return;
 
-        const newHidden = hiddenMatrix.map((row) => [...row]);
+        const newHidden = deepCopyMatrix(hiddenMatrix);
         newHidden[row][col] = newHidden[row][col] === "flag" ? true : "flag";
-        setHiddenMatrix(newHidden);
+
+        if (!matricesEqual(hiddenMatrix, newHidden)) {
+            setHiddenMatrix(newHidden);
+        }
     };
 
     if (
