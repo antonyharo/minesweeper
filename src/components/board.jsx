@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Tile from "@/components/tile";
 
-// Direções fixas (fora do componente para não recriar a cada render)
 const DIRECTIONS = [
     [-1, -1],
     [-1, 0],
@@ -15,13 +14,23 @@ const DIRECTIONS = [
     [1, 1],
 ];
 
-// Função para copiar matrizes profundamente
 const deepCopyMatrix = (matrix) => matrix.map((row) => [...row]);
-
-// Função para comparar duas matrizes
 const matricesEqual = (a, b) =>
     a.length === b.length &&
     a.every((row, i) => row.every((cell, j) => cell === b[i][j]));
+
+const formatTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+        2,
+        "0"
+    );
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    const milliseconds = String(ms % 1000).padStart(3, "0");
+
+    return `${hours}:${minutes}:${seconds}:${milliseconds}`;
+};
 
 export default function Board({
     matrix,
@@ -32,16 +41,42 @@ export default function Board({
     setDefeat,
 }) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
+    const [timerMs, setTimerMs] = useState(0);
+    const [gameStarted, setGameStarted] = useState(false);
+    const intervalRef = useRef(null);
 
     useEffect(() => {
         if (matrix && matrix.length > 0) {
             setHiddenMatrix(matrix.map((row) => row.map(() => true)));
+            setTimerMs(0);
+            setGameStarted(false);
 
             if (process.env.NODE_ENV === "development") {
                 console.table(matrix);
             }
         }
     }, [matrix]);
+
+    useEffect(() => {
+        const shouldRunTimer =
+            gameStarted && !loading && !win && !defeat && matrix.length > 0;
+
+        if (shouldRunTimer) {
+            if (intervalRef.current === null) {
+                intervalRef.current = setInterval(() => {
+                    setTimerMs((prev) => prev + 50); // Atualiza a cada 50ms
+                }, 50);
+            }
+        } else {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+
+        return () => {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        };
+    }, [gameStarted, loading, win, defeat, matrix.length]);
 
     useEffect(() => {
         if (!matrix || hiddenMatrix.length === 0 || loading) return;
@@ -158,6 +193,10 @@ export default function Board({
         )
             return;
 
+        if (!gameStarted) {
+            setGameStarted(true);
+        }
+
         if (hiddenMatrix[row][col] === false) {
             if (matrix[row][col] > 0) handleNumberClick(row, col);
             return;
@@ -214,6 +253,10 @@ export default function Board({
 
     return (
         <div className="grid gap-2">
+            <div className="text-center text-lg font-bold text-zinc-700">
+                {formatTime(timerMs)}
+            </div>
+
             {matrix.map((row, i) => (
                 <div key={i} className="grid grid-cols-9 gap-2">
                     {row.map((cell, j) => (
