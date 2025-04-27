@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createMatrix } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Confetti from "@/components/confetti";
 import Board from "@/components/board";
 
 export default function Page() {
@@ -30,8 +31,21 @@ export default function Page() {
     }, []);
 
     return (
-        <main className="flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+        <main className="relative h-full w-full flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <h1 className="font-semibold text-2xl">Minesweeper 💣</h1>
+
+            {defeat && (
+                <div className="absolute inset-0 pointer-events-none">
+                    <Confetti active={defeat} defeat={defeat} />
+                </div>
+            )}
+
+            {win && (
+                <div className="absolute inset-0">
+                    <Confetti active={win} />
+                </div>
+            )}
+
             {loading ? (
                 <div className="font-medium text-zinc-500">
                     Carregando tabuleiro...
@@ -46,11 +60,7 @@ export default function Page() {
                     setDefeat={setDefeat}
                 />
             )}
-            <Button
-                // className="py-1 px-2 rounded-sm border-2 border-red-400 text-red-400 font-medium cursor-pointer disabled:opacity-50"
-                onClick={resetGame}
-                disabled={loading}
-            >
+            <Button onClick={resetGame} disabled={loading}>
                 New Game
             </Button>
         </main>
