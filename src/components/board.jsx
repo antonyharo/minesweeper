@@ -253,7 +253,11 @@ export default function Board({
 
     return (
         <div className="grid gap-2">
-            <div className="text-center text-lg font-bold text-zinc-700">
+            <div
+                className={`text-center text-lg font-bold transition duration-200 text-${
+                    timerMs ? "primary" : "secondary"
+                }`}
+            >
                 {formatTime(timerMs)}
             </div>
 

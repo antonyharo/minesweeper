@@ -5,8 +5,9 @@ import { memo } from "react";
 function Tile({ value, hidden, win, flag, onClick, onRightClick }) {
     const baseClasses =
         "h-8 w-8 text-sm flex items-center justify-center rounded-sm border-none transition duration-200";
+
     const visibleClass = hidden
-        ? "bg-zinc-300 hover:bg-zinc-400 cursor-pointer"
+        ? "bg-secondary hover:bg-ring cursor-pointer"
         : value === "x"
         ? win
             ? "bg-green-400"
