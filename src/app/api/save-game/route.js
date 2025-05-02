@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseClient } from "@/lib/supabase";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req) {
     try {
-        const { title, description } = await req.json();
+        const { result, difficulty } = await req.json();
         const { userId, getToken } = await auth(req);
 
         if (!userId) {
@@ -14,9 +14,11 @@ export async function POST(req) {
             );
         }
 
-        if (!title || !description) {
+        if (!result || !difficulty) {
             return NextResponse.json(
-                { error: "Título e descrição são obrigatórios" },
+                {
+                    error: "Resultado e dificuldade são parâmetros obrigatórios",
+                },
                 { status: 400 }
             );
         }
@@ -24,9 +26,18 @@ export async function POST(req) {
         const token = await getToken({ template: "supabase" });
         const supabase = supabaseClient(token);
 
+        const user = await currentUser();
+
         const { data, error } = await supabase
-            .from("tasks")
-            .insert([{ title, description, user_id: userId }])
+            .from("game_history")
+            .insert([
+                {
+                    result,
+                    difficulty,
+                    username: user.username,
+                    user_id: userId,
+                },
+            ])
             .select()
             .single();
 

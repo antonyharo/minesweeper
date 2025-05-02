@@ -1,36 +1,18 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { toast } from "sonner";
+
+import {
+    directions,
+    deepCopyMatrix,
+    matricesEqual,
+    formatTime,
+    isInBounds,
+} from "@/lib/utils";
+
+import SkeletonBoard from "./skeleton-board";
 import Tile from "@/components/tile";
-
-const DIRECTIONS = [
-    [-1, -1],
-    [-1, 0],
-    [-1, 1],
-    [0, -1],
-    [0, 1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-];
-
-const deepCopyMatrix = (matrix) => matrix.map((row) => [...row]);
-const matricesEqual = (a, b) =>
-    a.length === b.length &&
-    a.every((row, i) => row.every((cell, j) => cell === b[i][j]));
-
-const formatTime = (ms) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
-        2,
-        "0"
-    );
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
-    const milliseconds = String(ms % 1000).padStart(3, "0");
-
-    return `${hours}:${minutes}:${seconds}:${milliseconds}`;
-};
 
 export default function Board({
     matrix,
@@ -78,36 +60,75 @@ export default function Board({
         };
     }, [gameStarted, loading, win, defeat, matrix.length]);
 
+    // useEffect para detectar vitória
     useEffect(() => {
-        if (!matrix || hiddenMatrix.length === 0 || loading) return;
+        const checkWin = async () => {
+            if (!matrix || hiddenMatrix.length === 0 || loading) return;
 
-        const totalCells = matrix.length * matrix[0].length;
-        const bombCount = matrix.flat().filter((cell) => cell === "x").length;
-        const revealedCount = hiddenMatrix
-            .flat()
-            .filter((cell) => cell === false).length;
+            const totalCells = matrix.length * matrix[0].length;
+            const bombCount = matrix
+                .flat()
+                .filter((cell) => cell === "x").length;
+            const revealedCount = hiddenMatrix
+                .flat()
+                .filter((cell) => cell === false).length;
 
-        if (revealedCount === totalCells - bombCount) {
-            const revealed = matrix.map((row) => row.map(() => false));
-            setHiddenMatrix(revealed);
-            setWin(true);
-        }
+            if (revealedCount === totalCells - bombCount) {
+                await handleWin();
+            }
+        };
+
+        checkWin();
     }, [hiddenMatrix, loading, matrix, setWin]);
 
-    const isInBounds = (row, col) =>
-        row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length;
+    const saveResult = async (resultType) => {
+        console.log("salvando");
 
-    const handleDefeat = () => {
+        try {
+            const result = { result: resultType, difficulty: "easy" };
+
+            const response = await fetch("/api/save-game", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(result),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast("Partida salva com sucesso!");
+            } else {
+                console.log(data.error);
+                toast("Oooops! Um erro ocorreu ao salvar sua partida...");
+            }
+        } catch (error) {
+            console.log(error);
+            toast("Um erro ocorreu ao salvar sua partida...");
+        }
+    };
+
+    const handleWin = async () => {
+        const revealed = matrix.map((row) => row.map(() => false));
+        setHiddenMatrix(revealed);
+        setWin(true);
+        toast("Resultado salvo!", { description: "Você venceu!" });
+        await saveResult("win");
+    };
+
+    const handleDefeat = async () => {
+        if (defeat || win) return;
         const revealed = matrix.map((row) => row.map(() => false));
         setHiddenMatrix(revealed);
         setDefeat(true);
+        toast("Resultado salvo!", { description: "Você perdeu!" });
+        await saveResult("loss");
     };
 
     const countAdjacentFlags = (row, col) =>
-        DIRECTIONS.reduce((count, [dr, dc]) => {
+        directions.reduce((count, [dr, dc]) => {
             const newRow = row + dr;
             const newCol = col + dc;
-            return isInBounds(newRow, newCol) &&
+            return isInBounds(matrix, newRow, newCol) &&
                 hiddenMatrix[newRow][newCol] === "flag"
                 ? count + 1
                 : count;
@@ -123,7 +144,7 @@ export default function Board({
             const key = `${row},${col}`;
 
             if (
-                !isInBounds(row, col) ||
+                !isInBounds(matrix, row, col) ||
                 newHidden[row][col] === "flag" ||
                 visited.has(key)
             )
@@ -133,11 +154,14 @@ export default function Board({
             newHidden[row][col] = false;
 
             if (matrix[row][col] === 0) {
-                DIRECTIONS.forEach(([dr, dc]) => {
+                directions.forEach(([dr, dc]) => {
                     const newRow = row + dr;
                     const newCol = col + dc;
                     const newKey = `${newRow},${newCol}`;
-                    if (isInBounds(newRow, newCol) && !visited.has(newKey)) {
+                    if (
+                        isInBounds(matrix, newRow, newCol) &&
+                        !visited.has(newKey)
+                    ) {
                         queue.push([newRow, newCol]);
                     }
                 });
@@ -147,21 +171,21 @@ export default function Board({
         return newHidden;
     };
 
-    const clickAdjacentCells = (row, col) => {
+    const clickAdjacentCells = async (row, col) => {
         let newHidden = deepCopyMatrix(hiddenMatrix);
 
-        for (const [dr, dc] of DIRECTIONS) {
+        for (const [dr, dc] of directions) {
             const newRow = row + dr;
             const newCol = col + dc;
 
             if (
-                !isInBounds(newRow, newCol) ||
+                !isInBounds(matrix, newRow, newCol) ||
                 newHidden[newRow][newCol] !== true
             )
                 continue;
 
             if (matrix[newRow][newCol] === "x") {
-                handleDefeat();
+                await handleDefeat();
                 return;
             }
 
@@ -184,9 +208,9 @@ export default function Board({
         }
     };
 
-    const handleClick = (row, col) => {
+    const handleClick = async (row, col) => {
         if (
-            !isInBounds(row, col) ||
+            !isInBounds(matrix, row, col) ||
             hiddenMatrix[row][col] === "flag" ||
             defeat ||
             win
@@ -203,7 +227,7 @@ export default function Board({
         }
 
         if (matrix[row][col] === "x") {
-            handleDefeat();
+            await handleDefeat();
             return;
         }
 
@@ -223,7 +247,7 @@ export default function Board({
     const handleRightClick = (e, row, col) => {
         e.preventDefault();
         if (
-            !isInBounds(row, col) ||
+            !isInBounds(matrix, row, col) ||
             hiddenMatrix[row][col] === false ||
             defeat ||
             win
@@ -244,11 +268,7 @@ export default function Board({
         hiddenMatrix.length === 0 ||
         loading
     ) {
-        return (
-            <div className="font-medium text-zinc-500">
-                Carregando tabuleiro...
-            </div>
-        );
+        return <SkeletonBoard />;
     }
 
     return (

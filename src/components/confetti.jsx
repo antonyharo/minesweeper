@@ -8,7 +8,7 @@ export default function Confetti({ active = false, defeat }) {
 
     const emojis = defeat
         ? ["💀", "☠️", "💣"]
-        : ["🏆", "🏅", "🥇", "🎖️"];
+        : ["🏆", "🏅", "🥇"];
 
     // Monitorar mudanças na prop active
     useEffect(() => {

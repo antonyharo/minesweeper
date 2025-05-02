@@ -5,7 +5,7 @@ export function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
-const directions = [
+export const directions = [
     [-1, -1],
     [-1, 0],
     [-1, 1],
@@ -61,4 +61,26 @@ const updateAdjacentCells = (matrix, row, col) => {
             matrix[newRow][newCol] += 1;
         }
     }
+};
+
+export const isInBounds = (matrix, row, col) =>
+    row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length;
+
+export const deepCopyMatrix = (matrix) => matrix.map((row) => [...row]);
+
+export const matricesEqual = (a, b) =>
+    a.length === b.length &&
+    a.every((row, i) => row.every((cell, j) => cell === b[i][j]));
+
+export const formatTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+        2,
+        "0"
+    );
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    const milliseconds = String(ms % 1000).padStart(3, "0");
+
+    return `${hours}:${minutes}:${seconds}:${milliseconds}`;
 };

@@ -8,12 +8,22 @@ import { ArrowRight } from "lucide-react";
 
 import { createMatrix } from "@/lib/utils";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import AnimatedBoard from "@/components/animated-board";
 
 export default function Page() {
-    const [matrix, setMatrix] = useState([]);
+    const [matrix, setMatrix] = useState([
+        [0, 0, 0, 0, 0, 1, "x", 1, 0],
+        [0, 0, 0, 0, 0, 1, 1, 2, 1],
+        [0, 0, 1, 1, 0, 0, 0, "x", 1],
+        [0, 0, 2, "x", 1, 0, 1, 2, 2],
+        [0, 0, 2, 2, 2, 1, 2, "x", "x"],
+        [0, 0, 1, "x", 2, "x", 3, 3, 3],
+        [0, 0, 1, 2, 3, 2, "x", 2, "x"],
+        [0, 0, 0, 0, 1, "x", 2, 2, 1],
+        [0, 0, 0, 0, 1, 1, 1, "x", 1],
+    ]);
     const [loading, setLoading] = useState(false);
     const { openSignIn, openSignUp } = useClerk();
 
