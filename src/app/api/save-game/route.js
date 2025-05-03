@@ -4,7 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req) {
     try {
-        const { result, difficulty } = await req.json();
+        const { gameTime, result, difficulty } = await req.json();
         const { userId, getToken } = await auth(req);
 
         if (!userId) {
@@ -14,7 +14,7 @@ export async function POST(req) {
             );
         }
 
-        if (!result || !difficulty) {
+        if (!result || !difficulty || !gameTime) {
             return NextResponse.json(
                 {
                     error: "Resultado e dificuldade são parâmetros obrigatórios",
@@ -28,12 +28,23 @@ export async function POST(req) {
 
         const user = await currentUser();
 
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, "0");
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const year = now.getFullYear();
+        const hour = String(now.getHours()).padStart(2, "0");
+        const minute = String(now.getMinutes()).padStart(2, "0");
+
+        const createdAt = `${day}/${month}/${year} ${hour}:${minute}`;
+
         const { data, error } = await supabase
             .from("game_history")
             .insert([
                 {
+                    created_at: createdAt,
                     result,
                     difficulty,
+                    game_time: gameTime,
                     username: user.username,
                     user_id: userId,
                 },

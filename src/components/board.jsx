@@ -82,10 +82,10 @@ export default function Board({
     }, [hiddenMatrix, loading, matrix, setWin]);
 
     const saveResult = async (resultType) => {
-        console.log("salvando");
-
         try {
-            const result = { result: resultType, difficulty: "easy" };
+            const gameTime = formatTime(timerMs);
+
+            const result = { gameTime, result: resultType, difficulty: "easy" };
 
             const response = await fetch("/api/save-game", {
                 method: "POST",

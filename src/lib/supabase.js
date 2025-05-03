@@ -10,5 +10,3 @@ export const supabaseClient = (supabaseToken) => {
 
     return supabaseClient;
 };
-
-// export const supabase = createClient(supabaseUrl, supabaseKey);
