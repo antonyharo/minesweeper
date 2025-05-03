@@ -4,7 +4,13 @@ import { useClerk } from "@clerk/nextjs";
 
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-import { User, Timer, Calendar, Skull } from "lucide-react";
+import {
+    User,
+    Timer,
+    ChartNoAxesColumnDecreasing,
+    Skull,
+    Calendar,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -117,25 +123,32 @@ export default function Page() {
             </div>
 
             <div className="flex items-center gap-3 mb-10">
-                <Button variant={"outline"}>View Leaderboard</Button>
+                <Button variant={"outline"}>
+                    <ChartNoAxesColumnDecreasing />
+                    View Leaderboard
+                </Button>
                 <SignedOut>
                     <div className="flex gap-4">
-                        <Button onClick={openSignIn}>Entre!</Button>
-                        <Button variant="outline" onClick={openSignUp}>
-                            Sign-in to play!
+                        <Button variant="default" onClick={openSignIn}>
+                            Sign-up!
+                        </Button>
+                        <Button variant="default" onClick={openSignUp}>
+                            Sign-in!
                         </Button>
                     </div>
                 </SignedOut>
                 <SignedIn>
                     <div className="flex gap-4 items-center">
                         <Link href="/game" className="">
-                            <Button className="px-10 font-bold">Play</Button>
+                            <Button className="px-10">Play</Button>
                         </Link>
                     </div>
                 </SignedIn>
             </div>
 
-            <h1 className="text-2xl font-semibold">Recent Games</h1>
+            <h1 className="flex items-center gap-3 text-2xl font-semibold">
+                <Calendar /> Recent Games
+            </h1>
             {gameHistory && (
                 <section className="grid gap-3">
                     {gameHistory.map((game) => (

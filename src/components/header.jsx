@@ -1,18 +1,29 @@
 import { Button } from "./ui/button";
 
-import { Github } from "lucide-react";
+import { Github, ChartNoAxesColumnDecreasing } from "lucide-react";
+import { Bomb } from "lucide-react";
 
 import { ModeToggle } from "./mode-toggle";
 
 export default function Header() {
     return (
         <header className="flex gap-8 items-center mb-5">
-            <h1 className="font-semibold text-3xl">Minesweeper 💣</h1>
+            <h1 className="flex items-center gap-3 font-medium text-3xl">
+                <Bomb />
+                Minesweeper
+            </h1>
 
             <div className="flex gap-3 items-center">
                 <ModeToggle />
-                <Button size={"icon"}>
+
+                <Button variant={"outline"}>
                     <Github />
+                    GitHub
+                </Button>
+
+                <Button variant={"outline"}>
+                    <ChartNoAxesColumnDecreasing />
+                    Leaderboard
                 </Button>
             </div>
         </header>
