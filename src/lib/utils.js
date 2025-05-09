@@ -73,14 +73,10 @@ export const matricesEqual = (a, b) =>
     a.every((row, i) => row.every((cell, j) => cell === b[i][j]));
 
 export const formatTime = (ms) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
-        2,
-        "0"
-    );
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    const hours = String(Math.floor(ms / 3600000)).padStart(2, "0");
+    const minutes = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
+    const seconds = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
     const milliseconds = String(ms % 1000).padStart(3, "0");
 
-    return `${hours}:${minutes}:${seconds}:${milliseconds}`;
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };

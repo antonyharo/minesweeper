@@ -23,14 +23,14 @@ export default function Board({
     setDefeat,
 }) {
     const [hiddenMatrix, setHiddenMatrix] = useState([]);
-    const [timerMs, setTimerMs] = useState(0);
+    const [durationMs, setDurationMs] = useState(0);
     const [gameStarted, setGameStarted] = useState(false);
     const intervalRef = useRef(null);
 
     useEffect(() => {
         if (matrix && matrix.length > 0) {
             setHiddenMatrix(matrix.map((row) => row.map(() => true)));
-            setTimerMs(0);
+            setDurationMs(0);
             setGameStarted(false);
 
             if (process.env.NODE_ENV === "development") {
@@ -40,13 +40,18 @@ export default function Board({
     }, [matrix]);
 
     useEffect(() => {
+        let startTime = null;
+
         const shouldRunTimer =
             gameStarted && !loading && !win && !defeat && matrix.length > 0;
 
         if (shouldRunTimer) {
             if (intervalRef.current === null) {
+                startTime = Date.now() - durationMs;
+
                 intervalRef.current = setInterval(() => {
-                    setTimerMs((prev) => prev + 50); // Atualiza a cada 50ms
+                    const now = Date.now();
+                    setDurationMs(now - startTime);
                 }, 50);
             }
         } else {
@@ -83,9 +88,11 @@ export default function Board({
 
     const saveResult = async (resultType) => {
         try {
-            const gameTime = formatTime(timerMs);
-
-            const result = { gameTime, result: resultType, difficulty: "easy" };
+            const result = {
+                durationMs,
+                result: resultType,
+                difficulty: "easy",
+            };
 
             const response = await fetch("/api/save-game", {
                 method: "POST",
@@ -275,10 +282,10 @@ export default function Board({
         <div className="grid gap-2">
             <div
                 className={`text-center text-lg font-bold transition duration-200 text-${
-                    timerMs ? "primary" : "secondary"
+                    durationMs ? "primary" : "secondary"
                 }`}
             >
-                {formatTime(timerMs)}
+                {formatTime(durationMs)}
             </div>
 
             {matrix.map((row, i) => (

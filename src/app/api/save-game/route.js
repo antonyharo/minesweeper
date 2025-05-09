@@ -4,7 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req) {
     try {
-        const { gameTime, result, difficulty } = await req.json();
+        const { durationMs, result, difficulty } = await req.json();
         const { userId, getToken } = await auth(req);
 
         if (!userId) {
@@ -14,7 +14,7 @@ export async function POST(req) {
             );
         }
 
-        if (!result || !difficulty || !gameTime) {
+        if (!result || !difficulty || !durationMs) {
             return NextResponse.json(
                 {
                     error: "Resultado e dificuldade são parâmetros obrigatórios",
@@ -44,7 +44,7 @@ export async function POST(req) {
                     created_at: createdAt,
                     result,
                     difficulty,
-                    game_time: gameTime,
+                    duration_ms: durationMs,
                     username: user.username,
                     user_id: userId,
                 },
