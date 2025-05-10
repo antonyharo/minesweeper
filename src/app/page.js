@@ -20,6 +20,8 @@ import { formatTime } from "@/lib/utils";
 import Link from "next/link";
 import AnimatedBoard from "@/components/animated-board";
 import Header from "@/components/header";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function Page() {
     const [recentGames, setRecentGames] = useState(null);
@@ -98,14 +100,17 @@ export default function Page() {
             {recentGames && (
                 <section className="flex items-center gap-6 mb-6">
                     {recentGames.slice(0, 3).map((game, index) => (
-                        <div key={game.id} className="grid gap-2">
-                            <p className="font-bold">
-                                🏆 {index + 1}°
-                            </p>
-                            <p className="font-light text-ring flex items-center gap-2">
-                                {game.created_at}
-                            </p>
-                            <div className="flex items-center gap-10 border border-secondary px-6 py-3 rounded-sm">
+                        <Card key={game.id} className="grid gap-2">
+                            <CardHeader>
+                                <p className="font-bold">
+                                    🏆 Top {index + 1}° Global
+                                </p>
+                                <p className="font-light text-ring flex items-center gap-2">
+                                    {game.created_at}
+                                </p>
+                            </CardHeader>
+
+                            <CardContent className="flex items-center gap-10 mt-3">
                                 <p className="flex items-center gap-2">
                                     <User size={20} />
                                     {game.username || "?"}
@@ -114,8 +119,8 @@ export default function Page() {
                                     <Timer size={20} />
                                     {formatTime(game.duration_ms)}
                                 </p>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </section>
             )}
@@ -156,27 +161,28 @@ export default function Page() {
                 <Calendar /> Recent Games
             </h1>
             {recentGames && (
-                <section className="grid gap-3">
+                <section className="grid grid-cols-3 gap-4">
                     {recentGames.map((game) => (
-                        <div
-                            key={game.id}
-                            className="flex items-center gap-10 border border-secondary px-6 py-3 rounded-sm"
-                        >
-                            <p className="flex items-center gap-2">
-                                <User size={20} /> {game.username || "?"}
-                            </p>
-                            <p className="font-bold flex items-center gap-2">
-                                <Timer size={20} />
-                                {formatTime(game.duration_ms)}
-                            </p>
-                            <p className="font-light flex items-center gap-2">
-                                <Skull size={20} />
-                                {game.difficulty}
-                            </p>
-                            <p className="font-light text-ring flex items-center gap-2">
-                                {game.created_at}
-                            </p>
-                        </div>
+                        <Card key={game.id} className="gap-2">
+                            <CardHeader>
+                                <div className="flex items-center gap-3">
+                                    <p>{game.result}</p>
+                                    <p className="font-light text-ring flex items-center gap-2">
+                                        {game.created_at}
+                                    </p>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex items-center gap-8">
+                                <p className="flex items-center gap-2">
+                                    <User size={20} />
+                                    {game.username || "?"}
+                                </p>
+                                <p className="font-bold flex items-center gap-2">
+                                    <Timer size={20} />
+                                    {formatTime(game.duration_ms)}
+                                </p>
+                            </CardContent>
+                        </Card>
                     ))}
                 </section>
             )}

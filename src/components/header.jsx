@@ -4,6 +4,7 @@ import { Github, ChartNoAxesColumnDecreasing } from "lucide-react";
 import { Bomb } from "lucide-react";
 
 import { ModeToggle } from "./mode-toggle";
+import Link from "next/link";
 
 export default function Header() {
     return (
@@ -17,10 +18,16 @@ export default function Header() {
             <div className="flex gap-3 items-center">
                 <ModeToggle />
 
-                <Button variant={"outline"}>
-                    <Github />
-                    GitHub
-                </Button>
+                <a
+                    href="https://www.github.com/antonyharo/minesweeper"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <Button variant={"outline"}>
+                        <Github />
+                        GitHub
+                    </Button>
+                </a>
 
                 <Button variant={"outline"}>
                     <ChartNoAxesColumnDecreasing />
