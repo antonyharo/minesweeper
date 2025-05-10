@@ -6,13 +6,13 @@ import { FlagTriangleRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
-import { ModeToggle } from "@/components/mode-toggle";
 
 import Confetti from "@/components/confetti";
 import SkeletonBoard from "@/components/skeleton-board";
 import Board from "@/components/board";
 
 import { createMatrix } from "@/lib/utils";
+import Header from "@/components/header";
 
 export default function Page() {
     const [matrix, setMatrix] = useState([]);
@@ -41,7 +41,7 @@ export default function Page() {
 
     return (
         <main className="relative h-full w-full flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-6 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-            <h1 className="font-semibold text-2xl">Minesweeper 💣</h1>
+            <Header />
 
             {/* <div className="absolute inset-0 pointer-events-none">
                 <Confetti active={defeat} defeat={defeat} />

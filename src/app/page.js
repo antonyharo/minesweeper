@@ -10,6 +10,7 @@ import {
     ChartNoAxesColumnDecreasing,
     Skull,
     Calendar,
+    Trophy,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -102,8 +103,13 @@ export default function Page() {
                     {recentGames.slice(0, 3).map((game, index) => (
                         <Card key={game.id} className="grid gap-2">
                             <CardHeader>
-                                <p className="font-bold">
-                                    🏆 Top {index + 1}° Global
+                                <p className="flex items-center gap-2.5 font-bold">
+                                    <Trophy
+                                        size={17}
+                                        className="text-yellow-400"
+                                    />{" "}
+                                    Top {index + 1}° Global
+                                    {/* 🏆 Top {index + 1}° Global */}
                                 </p>
                                 <p className="font-light text-ring flex items-center gap-2">
                                     {game.created_at}

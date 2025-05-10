@@ -13,10 +13,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function GET() {
     try {
         const { data, error } = await supabase
-            .from("game_history") // substitua com o nome correto da tabela
+            .from("game_history")
             .select("*")
             .eq("result", "win")
-            .order("duration_ms", { ascending: true });
+            .order("duration_ms", { ascending: false });
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

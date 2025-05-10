@@ -9,11 +9,11 @@ import Link from "next/link";
 export default function Header() {
     return (
         <header className="flex gap-8 items-center mb-5">
-            <h1 className="flex items-center gap-3 font-bold text-3xl">
-                {/* <Bomb /> */}
-                {/* Minesweeper */}
-                Minad@s 💣
-            </h1>
+            <Link href={"/"}>
+                <h1 className="flex items-center gap-3 font-bold text-3xl">
+                    Minad@s 💣
+                </h1>
+            </Link>
 
             <div className="flex gap-3 items-center">
                 <ModeToggle />
@@ -29,10 +29,12 @@ export default function Header() {
                     </Button>
                 </a>
 
-                <Button variant={"outline"}>
-                    <ChartNoAxesColumnDecreasing />
-                    Leaderboard
-                </Button>
+                <Link href="/leaderboard">
+                    <Button variant={"outline"}>
+                        <ChartNoAxesColumnDecreasing />
+                        Leaderboard
+                    </Button>
+                </Link>
             </div>
         </header>
     );
