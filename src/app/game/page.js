@@ -16,6 +16,7 @@ import Header from "@/components/header";
 
 export default function Page() {
     const [matrix, setMatrix] = useState([]);
+    const [flagsOn, setFlagsOn] = useState(false);
     const [win, setWin] = useState(false);
     const [defeat, setDefeat] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -57,6 +58,7 @@ export default function Page() {
                 <Board
                     matrix={matrix}
                     loading={loading}
+                    flagsOn={flagsOn}
                     win={win}
                     setWin={setWin}
                     defeat={defeat}
@@ -69,7 +71,10 @@ export default function Page() {
                     New Game
                 </Button>
                 <Separator orientation="vertical" />
-                <Toggle aria-label="Toggle flag">
+                <Toggle
+                    aria-label="Toggle flag"
+                    onClick={() => setFlagsOn(flagsOn ? false : true)}
+                >
                     <FlagTriangleRight />
                 </Toggle>
             </div>

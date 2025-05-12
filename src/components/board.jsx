@@ -16,6 +16,7 @@ import Tile from "@/components/tile";
 
 export default function Board({
     matrix,
+    flagsOn,
     loading,
     win,
     setWin,
@@ -215,10 +216,10 @@ export default function Board({
         }
     };
 
-    const handleClick = async (row, col) => {
+    const handleClick = async (e, row, col) => {
         if (
+            (hiddenMatrix[row][col] === "flag" && flagsOn === false) ||
             !isInBounds(matrix, row, col) ||
-            hiddenMatrix[row][col] === "flag" ||
             defeat ||
             win
         )
@@ -226,6 +227,15 @@ export default function Board({
 
         if (!gameStarted) {
             setGameStarted(true);
+        }
+
+        if (flagsOn) {
+            if (
+                hiddenMatrix[row][col] === true ||
+                hiddenMatrix[row][col] === "flag"
+            )
+                handleRightClick(e, row, col);
+            return;
         }
 
         if (hiddenMatrix[row][col] === false) {
@@ -297,7 +307,7 @@ export default function Board({
                             hidden={hiddenMatrix[i][j]}
                             win={win}
                             flag={hiddenMatrix[i][j] === "flag"}
-                            onClick={() => handleClick(i, j)}
+                            onClick={(e) => handleClick(e, i, j)}
                             onRightClick={(e) => handleRightClick(e, i, j)}
                         />
                     ))}
