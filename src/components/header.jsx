@@ -17,6 +17,13 @@ export default function Header() {
 
             <div className="flex gap-3 items-center">
                 <ModeToggle />
+                
+                <Link href="/leaderboard">
+                    <Button variant={"outline"}>
+                        <ChartNoAxesColumnDecreasing />
+                        Leaderboard
+                    </Button>
+                </Link>
 
                 <a
                     href="https://www.github.com/antonyharo/minesweeper"
@@ -28,13 +35,6 @@ export default function Header() {
                         GitHub
                     </Button>
                 </a>
-
-                <Link href="/leaderboard">
-                    <Button variant={"outline"}>
-                        <ChartNoAxesColumnDecreasing />
-                        Leaderboard
-                    </Button>
-                </Link>
             </div>
         </header>
     );

@@ -8,12 +8,14 @@ import {
     User,
     Timer,
     ChartNoAxesColumnDecreasing,
-    Skull,
     Calendar,
     Trophy,
+    CircleCheck,
+    CircleX,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import { createMatrix } from "@/lib/utils";
 import { formatTime } from "@/lib/utils";
@@ -21,11 +23,14 @@ import { formatTime } from "@/lib/utils";
 import Link from "next/link";
 import AnimatedBoard from "@/components/animated-board";
 import Header from "@/components/header";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import SkeletonCard from "@/components/skeleton-card";
 
 export default function Page() {
     const [recentGames, setRecentGames] = useState(null);
+    const [leaderboard, setLeaderboard] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const { openSignIn, openSignUp } = useClerk();
+
     const [firstMatrix, setFirstMatrix] = useState([
         [0, 0, 0, 0, 0, 1, "x", 1, 0],
         [0, 0, 0, 0, 0, 1, 1, 2, 1],
@@ -60,32 +65,36 @@ export default function Page() {
         [0, 1, 1, 1, 0, 1, 2, "x", 2],
     ]);
 
-    const [loading, setLoading] = useState(false);
-    const { openSignIn, openSignUp } = useClerk();
-
     useEffect(() => {
         const loadBoard = async () => {
-            setLoading(true);
             const newFirstMatrix = await createMatrix(9, 9, 10);
             const newSecondMatrix = await createMatrix(9, 9, 10);
             const newThirdMatrix = await createMatrix(9, 9, 10);
             setFirstMatrix(newFirstMatrix);
             setSecondMatrix(newSecondMatrix);
             setThirdMatrix(newThirdMatrix);
-            setLoading(false);
         };
 
-        const getRecentGames = async () => {
+        const getGames = async () => {
             try {
-                const response = await fetch("/api/recent-games");
-                const data = await response.json();
-                setRecentGames(data);
+                setLoading(true);
+
+                const recentGamesResponse = await fetch("/api/recent-games");
+                const recentGamesData = await recentGamesResponse.json();
+
+                const leaderboardResponse = await fetch("/api/leaderboard");
+                const leaderboardData = await leaderboardResponse.json();
+
+                setRecentGames(recentGamesData);
+                setLeaderboard(leaderboardData);
             } catch (error) {
                 console.log(error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        getRecentGames();
+        getGames();
 
         const interval = setInterval(() => {
             loadBoard();
@@ -97,10 +106,16 @@ export default function Page() {
     return (
         <main className="relative h-full w-full flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <Header />
-
-            {recentGames && (
+            {loading && (
+                <section className="flex items-center gap-6">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </section>
+            )}
+            {leaderboard && (
                 <section className="flex items-center gap-6 mb-6">
-                    {recentGames.slice(0, 3).map((game, index) => (
+                    {leaderboard.slice(0, 3).map((game, index) => (
                         <Card key={game.id} className="grid gap-2">
                             <CardHeader>
                                 <p className="flex items-center gap-2.5 font-bold">
@@ -109,7 +124,6 @@ export default function Page() {
                                         className="text-yellow-400"
                                     />{" "}
                                     Top {index + 1}° Global
-                                    {/* 🏆 Top {index + 1}° Global */}
                                 </p>
                                 <p className="font-light text-ring flex items-center gap-2">
                                     {game.created_at}
@@ -132,11 +146,11 @@ export default function Page() {
             )}
 
             <div className="flex items-center gap-12">
-                <AnimatedBoard matrix={firstMatrix} loading={loading} />
+                <AnimatedBoard matrix={firstMatrix} />
                 <hr className="w-[1px] h-70 bg-border" />
-                <AnimatedBoard matrix={secondMatrix} loading={loading} />
+                <AnimatedBoard matrix={secondMatrix} />
                 <hr className="w-[1px] h-70 bg-border" />
-                <AnimatedBoard matrix={thirdMatrix} loading={loading} />
+                <AnimatedBoard matrix={thirdMatrix} />
             </div>
 
             <div className="flex items-center gap-3 mb-10">
@@ -166,14 +180,48 @@ export default function Page() {
             <h1 className="flex items-center gap-3 text-2xl font-semibold">
                 <Calendar /> Recent Games
             </h1>
+            {loading && (
+                <section className="grid grid-cols-3 gap-4">
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                    <SkeletonCard />
+                </section>
+            )}
             {recentGames && (
                 <section className="grid grid-cols-3 gap-4">
                     {recentGames.map((game) => (
                         <Card key={game.id} className="gap-2">
                             <CardHeader>
                                 <div className="flex items-center gap-3">
-                                    <p>{game.result}</p>
-                                    <p className="font-light text-ring flex items-center gap-2">
+                                    <p className="flex items-center gap-2">
+                                        {game.result === "win" ? (
+                                            <>
+                                                <CircleCheck
+                                                    className="text-green-400"
+                                                    size={18}
+                                                />
+                                                Win
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CircleX
+                                                    className="text-red-400"
+                                                    size={18}
+                                                />
+                                                Loss
+                                            </>
+                                        )}
+                                    </p>
+                                    <p className="font-light text-ring flex items-center gap-2 text-sm">
                                         {game.created_at}
                                     </p>
                                 </div>

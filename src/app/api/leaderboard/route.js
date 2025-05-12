@@ -16,7 +16,7 @@ export async function GET() {
             .from("game_history")
             .select("*")
             .eq("result", "win")
-            .order("duration_ms", { ascending: false });
+            .order("duration_ms", { ascending: true });
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,5 +1,3 @@
-"use client";
-
 import Tile from "@/components/tile";
 import SkeletonBoard from "@/components/skeleton-board";
 
