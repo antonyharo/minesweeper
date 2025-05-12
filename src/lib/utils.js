@@ -16,6 +16,28 @@ export const directions = [
     [1, 1],
 ];
 
+export const createSafeMatrix = async (rows, cols, bombs, safeRow, safeCol) => {
+    let matrix;
+    let attempts = 0;
+
+    do {
+        matrix = createEmptyMatrix(rows, cols);
+        addBombs(matrix, bombs);
+        attempts++;
+    } while (isUnsafe(matrix, safeRow, safeCol) && attempts < 10);
+
+    return matrix;
+};
+
+const isUnsafe = (matrix, row, col) => {
+    for (let [dr, dc] of directions) {
+        const r = row + dr;
+        const c = col + dc;
+        if (isInBounds(matrix, r, c) && matrix[r][c] === "x") return true;
+    }
+    return matrix[row][col] === "x";
+};
+
 export const createMatrix = async (rows, cols, bombs) => {
     const matrix = createEmptyMatrix(rows, cols);
     addBombs(matrix, bombs);

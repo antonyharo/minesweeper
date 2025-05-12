@@ -9,50 +9,44 @@ import {
     matricesEqual,
     formatTime,
     isInBounds,
+    createSafeMatrix,
 } from "@/lib/utils";
 
 import SkeletonBoard from "./skeleton-board";
 import Tile from "@/components/tile";
 
-export default function Board({
-    matrix,
+export default function Game({
     flagsOn,
     loading,
     win,
     setWin,
     defeat,
     setDefeat,
+    saveResult
 }) {
-    const [hiddenMatrix, setHiddenMatrix] = useState([]);
+    const [matrix, setMatrix] = useState(
+        Array.from({ length: 9 }, () => Array(9).fill(0))
+    );
+    const [hiddenMatrix, setHiddenMatrix] = useState(
+        Array.from({ length: 9 }, () => Array(9).fill(true))
+    );
     const [durationMs, setDurationMs] = useState(0);
     const [gameStarted, setGameStarted] = useState(false);
+    const [firstClick, setFirstClick] = useState(null);
     const intervalRef = useRef(null);
 
-    useEffect(() => {
-        if (matrix && matrix.length > 0) {
-            setHiddenMatrix(matrix.map((row) => row.map(() => true)));
-            setDurationMs(0);
-            setGameStarted(false);
-
-            if (process.env.NODE_ENV === "development") {
-                console.table(matrix);
-            }
-        }
-    }, [matrix]);
-
+    // Controla o timer
     useEffect(() => {
         let startTime = null;
 
-        const shouldRunTimer =
-            gameStarted && !loading && !win && !defeat && matrix.length > 0;
-
-        if (shouldRunTimer) {
+        if (gameStarted && !loading && !win && !defeat && matrix.length > 0) {
             if (intervalRef.current === null) {
                 startTime = Date.now() - durationMs;
 
                 intervalRef.current = setInterval(() => {
-                    const now = Date.now();
-                    setDurationMs(now - startTime);
+                    if (!win && !defeat) {
+                        setDurationMs(Date.now() - startTime);
+                    }
                 }, 50);
             }
         } else {
@@ -66,7 +60,29 @@ export default function Board({
         };
     }, [gameStarted, loading, win, defeat, matrix.length]);
 
-    // useEffect para detectar vitória
+    // Criação segura da matriz ao primeiro clique
+    useEffect(() => {
+        if (firstClick) {
+            const { row, col } = firstClick;
+            createSafeMatrix(9, 9, 10, row, col).then((safeMatrix) => {
+                setMatrix(safeMatrix);
+                setHiddenMatrix(
+                    Array.from({ length: 9 }, () => Array(9).fill(true))
+                );
+                const revealed = revealEmptyArea(
+                    row,
+                    col,
+                    Array.from({ length: 9 }, () => Array(9).fill(true)),
+                    safeMatrix
+                );
+                setHiddenMatrix(revealed);
+                setGameStarted(true);
+                setFirstClick(null);
+            });
+        }
+    }, [firstClick]);
+
+    // Verificação de vitória
     useEffect(() => {
         const checkWin = async () => {
             if (!matrix || hiddenMatrix.length === 0 || loading) return;
@@ -85,42 +101,14 @@ export default function Board({
         };
 
         checkWin();
-    }, [hiddenMatrix, loading, matrix, setWin]);
-
-    const saveResult = async (resultType) => {
-        try {
-            const result = {
-                durationMs,
-                result: resultType,
-                difficulty: "easy",
-            };
-
-            const response = await fetch("/api/save-game", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(result),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toast("Partida salva com sucesso!");
-            } else {
-                console.log(data.error);
-                toast("Oooops! Um erro ocorreu ao salvar sua partida...");
-            }
-        } catch (error) {
-            console.log(error);
-            toast("Um erro ocorreu ao salvar sua partida...");
-        }
-    };
+    }, [matrix, hiddenMatrix, loading]);
 
     const handleWin = async () => {
         const revealed = matrix.map((row) => row.map(() => false));
         setHiddenMatrix(revealed);
         setWin(true);
         toast("Resultado salvo!", { description: "Você venceu!" });
-        await saveResult("win");
+        await saveResult("win", durationMs);
     };
 
     const handleDefeat = async () => {
@@ -129,7 +117,7 @@ export default function Board({
         setHiddenMatrix(revealed);
         setDefeat(true);
         toast("Resultado salvo!", { description: "Você perdeu!" });
-        await saveResult("loss");
+        await saveResult("loss", durationMs);
     };
 
     const countAdjacentFlags = (row, col) =>
@@ -142,7 +130,12 @@ export default function Board({
                 : count;
         }, 0);
 
-    const revealEmptyArea = (startRow, startCol, baseHidden) => {
+    const revealEmptyArea = (
+        startRow,
+        startCol,
+        baseHidden,
+        baseMatrix = matrix
+    ) => {
         const queue = [[startRow, startCol]];
         const visited = new Set();
         const newHidden = deepCopyMatrix(baseHidden);
@@ -152,7 +145,7 @@ export default function Board({
             const key = `${row},${col}`;
 
             if (
-                !isInBounds(matrix, row, col) ||
+                !isInBounds(baseMatrix, row, col) ||
                 newHidden[row][col] === "flag" ||
                 visited.has(key)
             )
@@ -161,13 +154,13 @@ export default function Board({
             visited.add(key);
             newHidden[row][col] = false;
 
-            if (matrix[row][col] === 0) {
+            if (baseMatrix[row][col] === 0) {
                 directions.forEach(([dr, dc]) => {
                     const newRow = row + dr;
                     const newCol = col + dc;
                     const newKey = `${newRow},${newCol}`;
                     if (
-                        isInBounds(matrix, newRow, newCol) &&
+                        isInBounds(baseMatrix, newRow, newCol) &&
                         !visited.has(newKey)
                     ) {
                         queue.push([newRow, newCol]);
@@ -209,37 +202,34 @@ export default function Board({
         }
     };
 
-    const handleNumberClick = (row, col) => {
-        const flags = countAdjacentFlags(row, col);
-        if (matrix[row][col] === flags) {
-            clickAdjacentCells(row, col);
-        }
-    };
-
     const handleClick = async (e, row, col) => {
+        e.preventDefault();
+
         if (
-            (hiddenMatrix[row][col] === "flag" && flagsOn === false) ||
-            !isInBounds(matrix, row, col) ||
             defeat ||
-            win
+            win ||
+            !isInBounds(matrix, row, col) ||
+            (hiddenMatrix[row][col] === "flag" && !flagsOn)
         )
             return;
 
         if (!gameStarted) {
-            setGameStarted(true);
+            setFirstClick({ row, col });
+            return;
         }
 
         if (flagsOn) {
-            if (
-                hiddenMatrix[row][col] === true ||
-                hiddenMatrix[row][col] === "flag"
-            )
-                handleRightClick(e, row, col);
+            handleRightClick(e, row, col);
             return;
         }
 
         if (hiddenMatrix[row][col] === false) {
-            if (matrix[row][col] > 0) handleNumberClick(row, col);
+            if (matrix[row][col] > 0) {
+                const flags = countAdjacentFlags(row, col);
+                if (flags === matrix[row][col]) {
+                    clickAdjacentCells(row, col);
+                }
+            }
             return;
         }
 
@@ -290,11 +280,7 @@ export default function Board({
 
     return (
         <div className="grid gap-2">
-            <div
-                className={`text-center text-lg font-bold transition duration-200 text-${
-                    durationMs ? "primary" : "secondary"
-                }`}
-            >
+            <div className="text-center text-lg font-bold transition duration-200 text-primary">
                 {formatTime(durationMs)}
             </div>
 

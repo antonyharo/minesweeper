@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 import { FlagTriangleRight } from "lucide-react";
 
@@ -8,26 +9,22 @@ import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 
 import Confetti from "@/components/confetti";
-import SkeletonBoard from "@/components/skeleton-board";
-import Board from "@/components/board";
+import Game from "@/components/game";
 
-import { createMatrix } from "@/lib/utils";
 import Header from "@/components/header";
+import SkeletonBoard from "@/components/skeleton-board";
 
 export default function Page() {
-    const [matrix, setMatrix] = useState([]);
-    const [flagsOn, setFlagsOn] = useState(false);
     const [win, setWin] = useState(false);
     const [defeat, setDefeat] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [flagsOn, setFlagsOn] = useState(false);
+    const [loading, setLoading] = useState(null);
 
     const loadGame = async () => {
         setLoading(true);
-        const newMatrix = await createMatrix(9, 9, 10);
-        setMatrix(newMatrix);
         setTimeout(() => {
             setLoading(false);
-        }, 3000);
+        }, 1);
     };
 
     const resetGame = async () => {
@@ -39,6 +36,34 @@ export default function Page() {
     useEffect(() => {
         loadGame();
     }, []);
+
+    const saveResult = async (resultType, durationMs) => {
+        try {
+            const result = {
+                durationMs,
+                result: resultType,
+                difficulty: "easy",
+            };
+
+            const response = await fetch("/api/save-game", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(result),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast("Partida salva com sucesso!");
+            } else {
+                console.log(data.error);
+                toast("Oooops! Um erro ocorreu ao salvar sua partida...");
+            }
+        } catch (error) {
+            console.log(error);
+            toast("Um erro ocorreu ao salvar sua partida...");
+        }
+    };
 
     return (
         <main className="relative h-full w-full flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-6 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -55,22 +80,22 @@ export default function Page() {
             {loading ? (
                 <SkeletonBoard />
             ) : (
-                <Board
-                    matrix={matrix}
+                <Game
                     loading={loading}
                     flagsOn={flagsOn}
                     win={win}
                     setWin={setWin}
                     defeat={defeat}
                     setDefeat={setDefeat}
+                    saveResult={saveResult}
                 />
             )}
 
             <div className="flex h-5 items-center space-x-4 text-sm">
-                <Button onClick={resetGame} disabled={loading}>
-                    New Game
-                </Button>
+                <Button onClick={resetGame}>New Game</Button>
+
                 <Separator orientation="vertical" />
+
                 <Toggle
                     aria-label="Toggle flag"
                     onClick={() => setFlagsOn(flagsOn ? false : true)}
