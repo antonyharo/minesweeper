@@ -1,21 +1,51 @@
+// /app/api/recent-games/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// Cria instância do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function GET() {
+// Função para lidar com GET e aplicar paginação
+export async function GET(req) {
     try {
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        // Lê os parâmetros de URL
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "12");
 
-        const { data: gameHistory } = await supabase
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        // Busca paginada
+        const { data, error, count } = await supabase
             .from("game_history")
-            .select("*");
+            .select("*", { count: "exact" })
+            .order("created_at", { ascending: false })
+            .range(from, to);
 
-        return NextResponse.json(gameHistory, { status: 200 });
-    } catch (error) {
+        if (error) {
+            console.error("Erro Supabase:", error.message);
+            return NextResponse.json(
+                { error: "Erro ao buscar dados" },
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json(
-            { error: "Erro ao buscar tarefas" },
+            {
+                data,
+                count,
+                page,
+                totalPages: Math.ceil((count || 0) / limit),
+            },
+            { status: 200 }
+        );
+    } catch (err) {
+        console.error("Erro interno:", err);
+        return NextResponse.json(
+            { error: "Erro interno do servidor" },
             { status: 500 }
         );
     }

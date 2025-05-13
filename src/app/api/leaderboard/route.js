@@ -10,19 +10,38 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function GET() {
+export async function GET(req) {
     try {
-        const { data, error } = await supabase
+        // Obter parâmetros de paginação da URL
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const offset = (page - 1) * limit;
+
+        // Consulta com paginação
+        const { data, error, count } = await supabase
             .from("game_history")
-            .select("*")
+            .select("*", { count: "exact" })
             .eq("result", "win")
-            .order("duration_ms", { ascending: true });
+            .order("duration_ms", { ascending: true })
+            .range(offset, offset + limit - 1);
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json(data, { status: 200 });
+        return NextResponse.json(
+            {
+                data,
+                pagination: {
+                    currentPage: page,
+                    totalItems: count,
+                    totalPages: Math.ceil((count || 0) / limit),
+                    itemsPerPage: limit,
+                },
+            },
+            { status: 200 }
+        );
     } catch (err) {
         console.error("Erro inesperado na API:", err);
         return NextResponse.json(

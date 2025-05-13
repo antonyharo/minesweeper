@@ -1,34 +1,63 @@
 "use client";
 import { useState, useEffect } from "react";
-
 import { User, Timer, Trophy, ChartNoAxesColumnIncreasing } from "lucide-react";
-
 import { formatTime } from "@/lib/utils";
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
+import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
 import SkeletonCard from "@/components/skeleton-card";
 
 export default function Page() {
-    const [leaderboard, setLeaderboard] = useState(null);
-    const [loading, setLoading] = useState(null);
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [topPlayers, setTopPlayers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        totalItems: 0,
+        totalPages: 1,
+        itemsPerPage: 9,
+    });
+    const [error, setError] = useState(null);
+
+    const fetchLeaderboard = async (page = 1) => {
+        try {
+            page === 1 ? setLoading(true) : setLoadingMore(true);
+            setError(null);
+
+            const response = await fetch(
+                `/api/leaderboard?page=${page}&limit=${pagination.itemsPerPage}`
+            );
+            if (!response.ok) throw new Error("Failed to fetch leaderboard");
+
+            const { data, pagination: paginationData } = await response.json();
+
+            setPagination(paginationData);
+
+            if (page === 1) {
+                setLeaderboard(data);
+                setTopPlayers(data.slice(0, 3));
+            } else {
+                setLeaderboard((prev) => [...prev, ...data]);
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    const handleLoadMore = () => {
+        if (pagination.currentPage < pagination.totalPages) {
+            const nextPage = pagination.currentPage + 1;
+            fetchLeaderboard(nextPage);
+        }
+    };
 
     useEffect(() => {
-        const getLeaderboard = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch("/api/leaderboard");
-                const data = await response.json();
-                setLeaderboard(data);
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getLeaderboard();
+        fetchLeaderboard();
     }, []);
 
     return (
@@ -40,6 +69,14 @@ export default function Page() {
                 Leaderboard
             </h1>
 
+            {/* Exibir mensagem de erro se houver */}
+            {error && (
+                <div className="text-red-500 p-4 bg-red-50 rounded-md">
+                    Error: {error}
+                </div>
+            )}
+
+            {/* Top 3 Players */}
             {loading && (
                 <section className="flex items-center gap-6">
                     <SkeletonCard />
@@ -47,18 +84,23 @@ export default function Page() {
                     <SkeletonCard />
                 </section>
             )}
-            {leaderboard && (
-                <section className="flex items-center gap-6">
-                    {leaderboard.slice(0, 3).map((game, index) => (
+            {topPlayers.length > 0 && (
+                <section className="lg:flex md:flex flex-wrap grid justify-center gap-6 mb-6">
+                    {topPlayers.map((game, index) => (
                         <Card key={game.id} className="grid gap-2">
                             <CardHeader>
                                 <p className="flex items-center gap-2.5 font-bold">
                                     <Trophy
                                         size={17}
-                                        className="text-yellow-400"
+                                        className={
+                                            index === 0
+                                                ? "text-yellow-400"
+                                                : index === 1
+                                                ? "text-gray-400"
+                                                : "text-amber-600"
+                                        }
                                     />{" "}
-                                    Top {index + 1}° Global
-                                    {/* 🏆 Top {index + 1}° Global */}
+                                    Top {index + 1}°
                                 </p>
                                 <p className="font-light text-ring flex items-center gap-2">
                                     {game.created_at}
@@ -68,7 +110,7 @@ export default function Page() {
                             <CardContent className="flex items-center gap-10 mt-3">
                                 <p className="flex items-center gap-2">
                                     <User size={20} />
-                                    {game.username || "?"}
+                                    {game.username || "Anonymous"}
                                 </p>
                                 <p className="font-bold flex items-center gap-2">
                                     <Timer size={20} />
@@ -82,47 +124,57 @@ export default function Page() {
 
             <hr className="w-3/4" />
 
-            {loading && (
+            {/* Lista completa com paginação */}
+            {loading ? (
                 <section className="grid grid-cols-3 gap-4">
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                </section>
-            )}
-            {leaderboard && (
-                <section className="grid grid-cols-3 gap-4">
-                    {leaderboard.map((game, index) => (
-                        <Card key={game.id} className="grid gap-2">
-                            <CardHeader>
-                                <div className="flex items-center gap-2">
-                                    <p className="flex items-center gap-2.5 font-bold">
-                                        {index + 1}°
-                                    </p>
-                                    <p className="font-light text-ring flex items-center gap-2">
-                                        {game.created_at}
-                                    </p>
-                                </div>
-                            </CardHeader>
-
-                            <CardContent className="flex items-center gap-10">
-                                <p className="flex items-center gap-2">
-                                    <User size={20} />
-                                    {game.username || "?"}
-                                </p>
-                                <p className="font-bold flex items-center gap-2">
-                                    <Timer size={20} />
-                                    {formatTime(game.duration_ms)}
-                                </p>
-                            </CardContent>
-                        </Card>
+                    {Array.from({ length: 9 }).map((_, i) => (
+                        <SkeletonCard key={i} />
                     ))}
                 </section>
+            ) : (
+                <>
+                    <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4 ">
+                        {leaderboard.map((game, index) => (
+                            <Card
+                                key={`${game.id}-${index}`}
+                                className="grid gap-2"
+                            >
+                                <CardHeader>
+                                    <div className="flex items-center gap-2">
+                                        <p className="flex items-center gap-2.5 font-bold">
+                                            #{index + 1}
+                                        </p>
+                                        <p className="font-light text-ring flex items-center gap-2">
+                                            {game.created_at}
+                                        </p>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="flex md:flex-wrap items-center justify-between gap-4">
+                                    <p className="flex items-center gap-2">
+                                        <User size={20} />
+                                        {game.username || "Anonymous"}
+                                    </p>
+                                    <p className="font-bold flex items-center gap-2">
+                                        <Timer size={20} />
+                                        {formatTime(game.duration_ms)}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </section>
+
+                    {/* Botão de carregar mais */}
+                    {pagination.currentPage < pagination.totalPages && (
+                        <Button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            variant="outline"
+                        >
+                            {loadingMore ? "Loading..." : "Load More"}
+                        </Button>
+                    )}
+                </>
             )}
         </main>
     );

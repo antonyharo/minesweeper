@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Header() {
     return (
-        <header className="flex gap-8 items-center mb-5">
+        <header className="flex flex-wrap justify-center gap-8 items-center mb-5">
             <Link href={"/"}>
                 <h1 className="flex items-center gap-3 font-bold text-3xl">
                     Minad@s 💣

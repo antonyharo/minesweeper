@@ -14,7 +14,7 @@ const numberColorMap = {
 };
 
 const BASE_CLASSES =
-    "h-8 w-8 border border-secondary text-sm flex items-center justify-center rounded-sm transition duration-200";
+    "w-8 aspect-square border border-secondary text-sm flex items-center justify-center rounded-sm transition duration-200";
 
 const HIDDEN_CLASS =
     "bg-secondary hover:bg-ring hover:border-transparent cursor-pointer";
@@ -26,7 +26,7 @@ const Tile = ({ value, hidden, win, flag, onClick, onRightClick }) => {
         ? win
             ? "bg-green-400 border-transparent"
             : "bg-red-400 border-transparent"
-        : `bg-transparent ${numberColorMap[value] || ""}`;
+        : `bg-transparent hover:border-ring ${numberColorMap[value] || ""}`;
 
     const displayContent = flag
         ? "🚩"
