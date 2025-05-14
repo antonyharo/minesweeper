@@ -22,7 +22,7 @@ export default function Game({
     setWin,
     defeat,
     setDefeat,
-    saveResult
+    saveResult,
 }) {
     const [matrix, setMatrix] = useState(
         Array.from({ length: 9 }, () => Array(9).fill(0))
@@ -279,13 +279,17 @@ export default function Game({
     }
 
     return (
-        <div className="grid gap-2">
+        <div className="grid gap-2" onContextMenu={(e) => e.preventDefault()}>
             <div className="text-center text-lg font-bold transition duration-200 text-primary">
                 {formatTime(durationMs)}
             </div>
 
             {matrix.map((row, i) => (
-                <div key={i} className="grid grid-cols-9 gap-2">
+                <div
+                    key={i}
+                    className="grid grid-cols-9 gap-2"
+                    onContextMenu={(e) => e.preventDefault()}
+                >
                     {row.map((cell, j) => (
                         <Tile
                             key={j}

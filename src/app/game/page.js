@@ -96,12 +96,16 @@ export default function Page() {
 
                 <Separator orientation="vertical" />
 
-                <Toggle
+                <Button
+                    size="icon"
+                    className={`hover:bg-normal bg-background text-primary border border-border ${
+                        flagsOn ? "bg-red-400" : "hover:bg-accent"
+                    }`}
                     aria-label="Toggle flag"
                     onClick={() => setFlagsOn(flagsOn ? false : true)}
                 >
-                    <FlagTriangleRight />
-                </Toggle>
+                    <FlagTriangleRight size={19} />
+                </Button>
             </div>
         </main>
     );
