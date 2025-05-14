@@ -102,3 +102,22 @@ export const formatTime = (ms) => {
 
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
+
+export const formatDateTime = (isoString) => {
+    if (!isoString) return null;
+
+    try {
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) return null; // Verifica se é uma data válida
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Mês é 0-based
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch {
+        return null;
+    }
+};

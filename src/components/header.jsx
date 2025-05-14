@@ -1,7 +1,6 @@
 import { Button } from "./ui/button";
 
-import { Github, ChartNoAxesColumnDecreasing } from "lucide-react";
-import { Bomb } from "lucide-react";
+import { Github, ChartNoAxesColumnIncreasing } from "lucide-react";
 
 import { ModeToggle } from "./mode-toggle";
 import Link from "next/link";
@@ -17,11 +16,11 @@ export default function Header() {
 
             <div className="flex gap-3 items-center">
                 <ModeToggle />
-                
+
                 <Link href="/leaderboard">
                     <Button variant={"outline"}>
-                        <ChartNoAxesColumnDecreasing />
-                        Leaderboard
+                        <ChartNoAxesColumnIncreasing />
+                        Ranking
                     </Button>
                 </Link>
 

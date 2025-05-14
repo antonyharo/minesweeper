@@ -1,10 +1,15 @@
 // /app/api/recent-games/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { formatDateTime } from "@/lib/utils";
 
-// Cria instância do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase environment variables are not set.");
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Função para lidar com GET e aplicar paginação
@@ -33,9 +38,16 @@ export async function GET(req) {
             );
         }
 
+        // Formata os dados, incluindo a conversão de datas
+        const formattedData =
+            data?.map((item) => ({
+                ...item,
+                created_at: formatDateTime(item.created_at), // Formata a data
+            })) || [];
+
         return NextResponse.json(
             {
-                data,
+                data: formattedData,
                 count,
                 page,
                 totalPages: Math.ceil((count || 0) / limit),

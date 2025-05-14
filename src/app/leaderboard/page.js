@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/header";
 import SkeletonCard from "@/components/skeleton-card";
+import GameCard from "@/components/game-card";
 
 export default function Page() {
     const [leaderboard, setLeaderboard] = useState([]);
@@ -66,7 +67,7 @@ export default function Page() {
 
             <h1 className="flex items-center gap-2 text-3xl font-bold">
                 <ChartNoAxesColumnIncreasing />
-                Leaderboard
+                Ranking
             </h1>
 
             {/* Exibir mensagem de erro se houver */}
@@ -87,37 +88,12 @@ export default function Page() {
             {topPlayers.length > 0 && (
                 <section className="lg:flex md:flex flex-wrap grid justify-center gap-6 mb-6">
                     {topPlayers.map((game, index) => (
-                        <Card key={game.id} className="grid gap-2">
-                            <CardHeader>
-                                <p className="flex items-center gap-2.5 font-bold">
-                                    <Trophy
-                                        size={17}
-                                        className={
-                                            index === 0
-                                                ? "text-yellow-400"
-                                                : index === 1
-                                                ? "text-gray-400"
-                                                : "text-amber-600"
-                                        }
-                                    />{" "}
-                                    Top {index + 1}°
-                                </p>
-                                <p className="font-light text-ring flex items-center gap-2">
-                                    {game.created_at}
-                                </p>
-                            </CardHeader>
-
-                            <CardContent className="flex items-center gap-10 mt-3">
-                                <p className="flex items-center gap-2">
-                                    <User size={20} />
-                                    {game.username || "Anonymous"}
-                                </p>
-                                <p className="font-bold flex items-center gap-2">
-                                    <Timer size={20} />
-                                    {formatTime(game.duration_ms)}
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <GameCard
+                            key={game.id}
+                            variant="topPlayer"
+                            game={game}
+                            position={index + 1}
+                        />
                     ))}
                 </section>
             )}
@@ -135,32 +111,12 @@ export default function Page() {
                 <>
                     <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4 ">
                         {leaderboard.map((game, index) => (
-                            <Card
-                                key={`${game.id}-${index}`}
-                                className="grid gap-2"
-                            >
-                                <CardHeader>
-                                    <div className="flex items-center gap-2">
-                                        <p className="flex items-center gap-2.5 font-bold">
-                                            #{index + 1}
-                                        </p>
-                                        <p className="font-light text-ring flex items-center gap-2">
-                                            {game.created_at}
-                                        </p>
-                                    </div>
-                                </CardHeader>
-
-                                <CardContent className="flex md:flex-wrap items-center justify-between gap-4">
-                                    <p className="flex items-center gap-2">
-                                        <User size={20} />
-                                        {game.username || "Anonymous"}
-                                    </p>
-                                    <p className="font-bold flex items-center gap-2">
-                                        <Timer size={20} />
-                                        {formatTime(game.duration_ms)}
-                                    </p>
-                                </CardContent>
-                            </Card>
+                            <GameCard
+                                key={game.id}
+                                variant="ranking"
+                                position={index + 1}
+                                game={game}
+                            />
                         ))}
                     </section>
 

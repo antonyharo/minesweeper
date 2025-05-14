@@ -4,19 +4,13 @@ import { useClerk } from "@clerk/nextjs";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 import {
-    User,
-    Timer,
-    ChartNoAxesColumnDecreasing,
+    ChartNoAxesColumnIncreasing,
     Calendar,
-    Trophy,
-    CircleCheck,
-    CircleX,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { createMatrix, formatTime } from "@/lib/utils";
+import { createMatrix } from "@/lib/utils";
 
 import Link from "next/link";
 import AnimatedBoard from "@/components/animated-board";
@@ -24,6 +18,7 @@ import Header from "@/components/header";
 import SkeletonCard from "@/components/skeleton-card";
 
 import useWindowWidth from "@/hooks/useWindowWidth";
+import GameCard from "@/components/game-card";
 
 export default function Page() {
     const [recentGames, setRecentGames] = useState([]);
@@ -66,9 +61,9 @@ export default function Page() {
                     throw new Error("Failed to fetch leaderboard");
 
                 const { data: leaderboardData } = await leaderboardRes.json();
-                setTopPlayers(leaderboardData);
-
+                
                 await fetchGames(1);
+                setTopPlayers(leaderboardData);
             } catch (err) {
                 console.error(err);
                 setError(err.message);
@@ -156,36 +151,12 @@ export default function Page() {
             {topPlayers.length > 0 && (
                 <section className="lg:flex md:flex flex-wrap grid justify-center gap-6 mb-6">
                     {topPlayers.map((game, index) => (
-                        <Card key={game.id} className="grid gap-2">
-                            <CardHeader>
-                                <p className="flex items-center gap-2.5 font-bold">
-                                    <Trophy
-                                        size={17}
-                                        className={
-                                            index === 0
-                                                ? "text-yellow-400"
-                                                : index === 1
-                                                ? "text-gray-400"
-                                                : "text-amber-600"
-                                        }
-                                    />
-                                    Top {index + 1}°
-                                </p>
-                                <p className="font-light text-ring flex items-center gap-2">
-                                    {game.created_at}
-                                </p>
-                            </CardHeader>
-                            <CardContent className="flex items-center gap-10 mt-3">
-                                <p className="flex items-center gap-2">
-                                    <User size={20} />
-                                    {game.username || "Anonymous"}
-                                </p>
-                                <p className="font-bold flex items-center gap-1">
-                                    <Timer size={20} />
-                                    {formatTime(game.duration_ms)}
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <GameCard
+                            variant="topPlayer"
+                            game={game}
+                            position={index + 1}
+                            key={game.id}
+                        />
                     ))}
                 </section>
             )}
@@ -195,31 +166,31 @@ export default function Page() {
             <div className="flex items-center gap-3 mb-10">
                 <Link href="/leaderboard">
                     <Button variant={"outline"}>
-                        <ChartNoAxesColumnDecreasing />
-                        View Leaderboard
+                        <ChartNoAxesColumnIncreasing />
+                        Ver Ranking
                     </Button>
                 </Link>
                 <SignedOut>
                     <div className="flex gap-4">
                         <Button variant="default" onClick={openSignIn}>
-                            Sign-up!
+                            Entre
                         </Button>
                         <Button variant="default" onClick={openSignUp}>
-                            Sign-in!
+                            Cadastre-se
                         </Button>
                     </div>
                 </SignedOut>
                 <SignedIn>
                     <div className="flex gap-4 items-center">
                         <Link href="/game">
-                            <Button className="px-10">Play</Button>
+                            <Button className="px-10">Jogar</Button>
                         </Link>
                     </div>
                 </SignedIn>
             </div>
 
             <h1 className="flex items-center gap-3 text-2xl font-semibold">
-                <Calendar /> Recent Games
+                <Calendar /> Partidas Recentes
             </h1>
 
             {loading && (
@@ -233,44 +204,7 @@ export default function Page() {
             {recentGames && (
                 <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
                     {recentGames.map((game) => (
-                        <Card key={game.id} className="gap-2">
-                            <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <p className="flex items-center gap-2">
-                                        {game.result === "win" ? (
-                                            <>
-                                                <CircleCheck
-                                                    className="text-green-400"
-                                                    size={18}
-                                                />
-                                                Win
-                                            </>
-                                        ) : (
-                                            <>
-                                                <CircleX
-                                                    className="text-red-400"
-                                                    size={18}
-                                                />
-                                                Loss
-                                            </>
-                                        )}
-                                    </p>
-                                    <p className="font-light text-ring flex items-center gap-2 text-sm">
-                                        {game.created_at}
-                                    </p>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex md:flex-wrap items-center justify-between gap-4">
-                                <p className="flex items-center gap-2">
-                                    <User size={20} />
-                                    {game.username || "Anonymous"}
-                                </p>
-                                <p className="font-bold flex items-center gap-1">
-                                    <Timer size={20} />
-                                    {formatTime(game.duration_ms)}
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <GameCard key={game.id} game={game} />
                     ))}
                 </section>
             )}
