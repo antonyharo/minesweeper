@@ -1,4 +1,4 @@
-### 🎯 **Objetivo do jogo:**
+### 🎯 **Campo Minado - Como jogar:**
 
 Abrir todos os quadrados **que não têm minas**.
 
