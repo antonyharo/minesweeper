@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { format, toZonedTime } from "date-fns-tz";
 
 export function cn(...inputs) {
     return twMerge(clsx(inputs));
@@ -103,21 +104,13 @@ export const formatTime = (ms) => {
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-export const formatDateTime = (isoString) => {
-    if (!isoString) return null;
+export const formatDateTime = (dateString) => {
+    const timeZone = "America/Sao_Paulo";
+    const date = new Date(dateString);
 
-    try {
-        const date = new Date(isoString);
-        if (isNaN(date.getTime())) return null; // Verifica se é uma data válida
+    // Converte para o fuso horário especificado
+    const zonedDate = toZonedTime(date, timeZone);
 
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0"); // Mês é 0-based
-        const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        return `${day}/${month}/${year} ${hours}:${minutes}`;
-    } catch {
-        return null;
-    }
+    // Formata no padrão brasileiro
+    return format(zonedDate, "dd/MM/yyyy HH:mm", { timeZone });
 };
