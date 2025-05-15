@@ -69,14 +69,6 @@ export default function Page() {
         <main className="relative h-full w-full flex items-center justify-center flex-col min-h-screen p-8 pb-20 gap-6 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <Header />
 
-            <div className="absolute inset-0 pointer-events-none">
-                <Confetti active={defeat} defeat={defeat} />
-            </div>
-
-            <div className="absolute inset-0 pointer-events-none">
-                <Confetti active={win} />
-            </div>
-
             {loading ? (
                 <SkeletonBoard />
             ) : (
