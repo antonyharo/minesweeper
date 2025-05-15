@@ -215,7 +215,7 @@ export default function Page() {
                     disabled={loadingMore}
                     variant="outline"
                 >
-                    {loadingMore ? "Loading..." : "Load More"}
+                    {loadingMore ? "Carregando..." : "Carregar mais"}
                 </Button>
             )}
         </main>
