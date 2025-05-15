@@ -79,7 +79,7 @@ export default function Page() {
 
             {/* Top 3 Players */}
             {loading && (
-                <section className="flex items-center gap-6">
+                <section className="lg:flex md:flex flex-wrap grid justify-center gap-6 mb-6">
                     <SkeletonCard />
                     <SkeletonCard />
                     <SkeletonCard />
@@ -102,14 +102,14 @@ export default function Page() {
 
             {/* Lista completa com paginação */}
             {loading ? (
-                <section className="grid grid-cols-3 gap-4">
+                <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
                     {Array.from({ length: 9 }).map((_, i) => (
                         <SkeletonCard key={i} />
                     ))}
                 </section>
             ) : (
                 <>
-                    <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4 ">
+                    <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
                         {leaderboard.map((game, index) => (
                             <GameCard
                                 key={game.id}

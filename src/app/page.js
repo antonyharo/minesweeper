@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useClerk } from "@clerk/nextjs";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-import {
-    ChartNoAxesColumnIncreasing,
-    Calendar,
-} from "lucide-react";
+import { ChartNoAxesColumnIncreasing, Calendar } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -61,7 +58,7 @@ export default function Page() {
                     throw new Error("Failed to fetch leaderboard");
 
                 const { data: leaderboardData } = await leaderboardRes.json();
-                
+
                 await fetchGames(1);
                 setTopPlayers(leaderboardData);
             } catch (err) {
@@ -134,13 +131,13 @@ export default function Page() {
 
             {/* Mensagem de erro */}
             {error && (
-                <div className="text-red-500 p-4 bg-red-50 rounded-md">
+                <div className="text-red-500">
                     Error: {error}
                 </div>
             )}
 
             {loading && (
-                <section className="flex flex-wrap gap-6">
+                <section className="lg:flex md:flex flex-wrap grid justify-center gap-6 mb-6">
                     <SkeletonCard />
                     <SkeletonCard />
                     <SkeletonCard />
@@ -194,7 +191,7 @@ export default function Page() {
             </h1>
 
             {loading && (
-                <section className="grid grid-cols-3 gap-4">
+                <section className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
                     {Array.from({ length: 12 }).map((_, i) => (
                         <SkeletonCard key={i} />
                     ))}
