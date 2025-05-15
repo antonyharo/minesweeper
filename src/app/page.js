@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useClerk } from "@clerk/nextjs";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-import { ChartNoAxesColumnIncreasing, Calendar } from "lucide-react";
+import { ChartNoAxesColumnIncreasing, Calendar , LogOut} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -27,7 +27,7 @@ export default function Page() {
     const [error, setError] = useState(null);
     const LIMIT = 9;
 
-    const { openSignIn, openSignUp } = useClerk();
+    const { signOut, openSignIn, openSignUp } = useClerk();
 
     const [firstMatrix, setFirstMatrix] = useState([
         [0, 0, 0, 0, 0, 1, "x", 1, 0],
@@ -203,11 +203,19 @@ export default function Page() {
                         </Button>
                     </div>
                 </SignedOut>
+
                 <SignedIn>
                     <div className="flex gap-4 items-center">
                         <Link href="/game">
                             <Button className="px-10">Jogar</Button>
                         </Link>
+                        <Button
+                            variant="outline"
+                            onClick={() => signOut({ redirectUrl: "/" })}
+                        >
+                            <LogOut/>
+                            Sair
+                        </Button>
                     </div>
                 </SignedIn>
             </div>
